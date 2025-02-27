@@ -1,0 +1,41 @@
+.sidebar {
+  width: 30%;
+  height: 100vh;
+  background-color: #2c3e50;
+  color: white;
+  padding: 20px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+
+  flex-direction: column;
+}
+
+.sidebar h2 {
+  margin-bottom: 20px;
+  font-size: 20px;
+  text-align: center;
+}
+
+.nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  flex-direction: column;
+  gap: 12px; /* Space between items */
+}
+
+.link {
+  font-size: 18px;
+  color: white;
+  cursor: pointer; /* Makes text look clickable */
+  padding: 8px 0;
+  transition: color 0.3s ease;
+}
+
+.link:hover {
+  color: #f1c40f; /* Highlight on hover */
+}
+
+.link:active {
+  opacity: 0.7; /* Click effect */
+}

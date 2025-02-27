@@ -1,0 +1,21 @@
+/* admin.module.css */
+.container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.mainContent {
+  flex-grow: 1;
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+.mainContent h1 {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.mainContent p {
+  color: #555;
+  font-size: 18px;
+}
