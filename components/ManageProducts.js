@@ -1,36 +1,281 @@
+// "use client";
+// import Image from "next/image";
+// import { useEffect, useState } from "react";
+// import styles from "./ManageProducts.module.css";
+
+// export default function ManageProducts() {
+//   const [products, setProducts] = useState([]);
+//   const [newProduct, setNewProduct] = useState({
+//     name: "",
+//     price: "",
+//     image: "",
+//   });
+
+//   useEffect(() => {
+//     fetch("/api/products")
+//       .then((res) => res.json())
+//       .then((data) => setProducts(data))
+//       .catch((err) => console.error("Failed to load products", err));
+//   }, []);
+
+//   const handleInputChange = (id, field, value) => {
+//     setProducts((prevProducts) =>
+//       prevProducts.map((product) =>
+//         product.id === id ? { ...product, [field]: value } : product
+//       )
+//     );
+//   };
+
+//   const handleSave = async (product) => {
+//     try {
+//       const response = await fetch(`/api/products/${product.id}`, {
+//         method: "PUT",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify(product),
+//       });
+
+//       if (!response.ok) throw new Error("Failed to update product");
+//       alert("Product updated successfully!");
+//     } catch (error) {
+//       console.error("Error updating product:", error);
+//       alert("An error occurred while updating the product.");
+//     }
+//   };
+
+//   const handleDelete = async (id) => {
+//     if (!confirm("Are you sure you want to delete this product?")) return;
+
+//     try {
+//       const response = await fetch(`/api/products/${id}`, {
+//         method: "DELETE",
+//       });
+
+//       if (response.ok) {
+//         setProducts(products.filter((product) => product.id !== id));
+//         alert("Product deleted successfully!");
+//       } else {
+//         throw new Error("Failed to delete product");
+//       }
+//     } catch (error) {
+//       console.error("Error deleting product:", error);
+//       alert("An error occurred while deleting the product.");
+//     }
+//   };
+
+//   const handleAddProduct = async () => {
+//     if (!newProduct.name || !newProduct.price) {
+//       alert("Please enter a product name and price.");
+//       return;
+//     }
+
+//     try {
+//       const response = await fetch("/api/products", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify(newProduct),
+//       });
+
+//       if (!response.ok) throw new Error("Failed to add product");
+
+//       const addedProduct = await response.json();
+//       setProducts([...products, addedProduct]);
+//       setNewProduct({ name: "", price: "", image: "" });
+//       alert("Product added successfully!");
+//     } catch (error) {
+//       console.error("Error adding product:", error);
+//       alert("An error occurred while adding the product.");
+//     }
+//   };
+
+//   return (
+//     <div className={styles.container}>
+//       <h1>Manage Products</h1>
+//       <table className={styles.table}>
+//         <thead>
+//           <tr>
+//             <th>Image</th>
+//             <th>Name</th>
+//             <th>Price ($)</th>
+//             <th>Actions</th>
+//           </tr>
+//         </thead>
+//         <tbody>
+//           {products.map((product) => (
+//             <tr key={product.id}>
+//               <td>
+//                 <input
+//                   type="text"
+//                   value={product.image}
+//                   onChange={(e) =>
+//                     handleInputChange(product.id, "image", e.target.value)
+//                   }
+//                   placeholder="Image URL"
+//                 />
+//               </td>
+//               <td>
+//                 <input
+//                   type="text"
+//                   value={product.name}
+//                   onChange={(e) =>
+//                     handleInputChange(product.id, "name", e.target.value)
+//                   }
+//                 />
+//               </td>
+//               <td>
+//                 <input
+//                   type="number"
+//                   value={product.price}
+//                   onChange={(e) =>
+//                     handleInputChange(product.id, "price", e.target.value)
+//                   }
+//                 />
+//               </td>
+//               <td>
+//                 <button onClick={() => handleSave(product)}>Save</button>
+//                 <button onClick={() => handleDelete(product.id)}>Delete</button>
+//               </td>
+//             </tr>
+//           ))}
+//           {/* Add Product Row */}
+//           <tr>
+//             <td>
+//               <input
+//                 type="text"
+//                 value={newProduct.image}
+//                 onChange={(e) =>
+//                   setNewProduct({ ...newProduct, image: e.target.value })
+//                 }
+//                 placeholder="Image URL"
+//               />
+//             </td>
+//             <td>
+//               <input
+//                 type="text"
+//                 value={newProduct.name}
+//                 onChange={(e) =>
+//                   setNewProduct({ ...newProduct, name: e.target.value })
+//                 }
+//                 placeholder="New Product Name"
+//               />
+//             </td>
+//             <td>
+//               <input
+//                 type="number"
+//                 value={newProduct.price}
+//                 onChange={(e) =>
+//                   setNewProduct({ ...newProduct, price: e.target.value })
+//                 }
+//                 placeholder="Price"
+//               />
+//             </td>
+//             <td>
+//               <button onClick={handleAddProduct}>Add</button>
+//             </td>
+//           </tr>
+//         </tbody>
+//       </table>
+//     </div>
+//   );
+// }
 "use client";
-import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import styles from "./ManageProducts.module.css";
 
 export default function ManageProducts() {
   const [products, setProducts] = useState([]);
-  const router = useRouter();
+  const [newProduct, setNewProduct] = useState({
+    name: "",
+    price: "",
+    image: "",
+  });
 
+  // Fetch products on component mount
   useEffect(() => {
-    fetch("./api/products")
-      .then((res) => res.json())
-      .then((data) => setProducts(data))
-      .catch((err) => console.error("Failed to load products", err));
+    fetchProducts();
   }, []);
 
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch("/api/products");
+      if (!response.ok) throw new Error("Failed to fetch products");
+      const data = await response.json();
+      setProducts(data);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      alert("Failed to load products. Please try again.");
+    }
+  };
+
+  // Handle input changes for editing products
+  const handleInputChange = (id, field, value) => {
+    setProducts((prevProducts) =>
+      prevProducts.map((product) =>
+        product.id === id ? { ...product, [field]: value } : product
+      )
+    );
+  };
+
+  // Save changes to a product
+  const handleSave = async (product) => {
+    try {
+      const response = await fetch(`/api/products/${product.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(product),
+      });
+
+      if (!response.ok) throw new Error("Failed to update product");
+      alert("Product updated successfully!");
+    } catch (error) {
+      console.error("Error updating product:", error);
+      alert("An error occurred while updating the product.");
+    }
+  };
+
+  // Delete a product
   const handleDelete = async (id) => {
-    if (confirm("Are you sure you want to delete this product?")) {
-      try {
-        const response = await fetch(`/api/products/${id}`, {
-          method: "DELETE",
-        });
-        if (response.ok) {
-          setProducts(products.filter((product) => product.id !== id)); // Remove product from state
-          alert("Product deleted successfully!");
-        } else {
-          alert("Failed to delete product.");
-        }
-      } catch (error) {
-        console.error("Error deleting product:", error);
-        alert("An error occurred while deleting the product.");
+    if (!confirm("Are you sure you want to delete this product?")) return;
+
+    try {
+      const response = await fetch(`/api/products/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setProducts(products.filter((product) => product.id !== id));
+        alert("Product deleted successfully!");
+      } else {
+        throw new Error("Failed to delete product");
       }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      alert("An error occurred while deleting the product.");
+    }
+  };
+
+  // Add a new product
+  const handleAddProduct = async () => {
+    if (!newProduct.name || !newProduct.price) {
+      alert("Please enter a product name and price.");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newProduct),
+      });
+
+      if (!response.ok) throw new Error("Failed to add product");
+
+      const addedProduct = await response.json();
+      setProducts([...products, addedProduct]);
+      setNewProduct({ name: "", price: "", image: "" }); // Reset form
+      alert("Product added successfully!");
+    } catch (error) {
+      console.error("Error adding product:", error);
+      alert("An error occurred while adding the product.");
     }
   };
 
@@ -42,7 +287,7 @@ export default function ManageProducts() {
           <tr>
             <th>Image</th>
             <th>Name</th>
-            <th>Price</th>
+            <th>Price ($)</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -50,386 +295,77 @@ export default function ManageProducts() {
           {products.map((product) => (
             <tr key={product.id}>
               <td>
-                {product.image ? (
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    width={50}
-                    height={50}
-                    className={styles.productImage}
-                  />
-                ) : (
-                  <span>No Image Available</span>
-                )}
-              </td>
-              <td>{product.name}</td>
-              <td>${product.price}</td>
-              <td>
-                <button
-                  onClick={() =>
-                    router.push(`/admin/add-product?id=${product.id}`)
+                <input
+                  type="text"
+                  value={product.image}
+                  onChange={(e) =>
+                    handleInputChange(product.id, "image", e.target.value)
                   }
-                >
-                  Edit
-                </button>
+                  placeholder="Image URL"
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  value={product.name}
+                  onChange={(e) =>
+                    handleInputChange(product.id, "name", e.target.value)
+                  }
+                />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  value={product.price}
+                  onChange={(e) =>
+                    handleInputChange(product.id, "price", e.target.value)
+                  }
+                />
+              </td>
+              <td>
+                <button onClick={() => handleSave(product)}>Save</button>
                 <button onClick={() => handleDelete(product.id)}>Delete</button>
               </td>
             </tr>
           ))}
+          {/* Add Product Row */}
+          <tr>
+            <td>
+              <input
+                type="text"
+                value={newProduct.image}
+                onChange={(e) =>
+                  setNewProduct({ ...newProduct, image: e.target.value })
+                }
+                placeholder="Image URL"
+              />
+            </td>
+            <td>
+              <input
+                type="text"
+                value={newProduct.name}
+                onChange={(e) =>
+                  setNewProduct({ ...newProduct, name: e.target.value })
+                }
+                placeholder="New Product Name"
+              />
+            </td>
+            <td>
+              <input
+                type="number"
+                value={newProduct.price}
+                onChange={(e) =>
+                  setNewProduct({ ...newProduct, price: e.target.value })
+                }
+                placeholder="Price"
+              />
+            </td>
+            <td>
+              <button onClick={handleAddProduct}>Add</button>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
   );
 }
-
-// "use client";
-
-// import Image from "next/image";
-// import { useEffect, useState } from "react";
-// import { useRouter } from "next/navigation";
-// import styles from "./ManageProducts.module.css";
-
-// export default function ManageProducts() {
-//   const [products, setProducts] = useState([]);
-//   const router = useRouter();
-
-//   useEffect(() => {
-//     fetch("./api/products")
-//       .then((res) => res.json())
-//       .then((data) => setProducts(data))
-//       .catch((err) => console.error("Failed to load products", err));
-//   }, []);
-
-//   return (
-//     <div className={styles.container}>
-//       <h1>Manage Products</h1>
-//       <table className={styles.table}>
-//         <thead>
-//           <tr>
-//             <th>Image</th>
-//             <th>Name</th>
-//             <th>Price</th>
-//             <th>Actions</th>
-//           </tr>
-//         </thead>
-//         <tbody>
-//           {products.map((product) => (
-//             <tr key={product.id}>
-//               <td>
-//                 <Image
-//                   src={product.image}
-//                   alt={product.name}
-//                   width={50} // Set a specific width
-//                   height={50} // Set a specific height
-//                   className={styles.productImage}
-//                 ></Image>
-//               </td>
-//               <td>{product.name}</td>
-//               <td>${product.price}</td>
-//               <td>
-//                 <button
-//                   onClick={() =>
-//                     router.push(`/admin/add-product?id=${product.id}`)
-//                   }
-//                 >
-//                   Edit
-//                 </button>
-//                 <button
-//                   onClick={() =>
-//                     fetch(`/api/products/${product.id}`, {
-//                       method: "DELETE",
-//                     }).then(() => window.location.reload())
-//                   }
-//                 >
-//                   Delete
-//                 </button>
-//               </td>
-//             </tr>
-//           ))}
-//         </tbody>
-//       </table>
-//     </div>
-//   );
-// }
-
-// "use client";
-
-// import { useEffect, useState } from "react";
-// import { useRouter } from "next/navigation";
-// import styles from "./ManageProducts.module.css";
-
-// export default function ManageProducts() {
-//   const [products, setProducts] = useState([]);
-//   const router = useRouter();
-
-//   useEffect(() => {
-//     fetch("./api/products")
-//       .then((res) => res.json())
-//       .then((data) => setProducts(data))
-//       .catch((err) => console.error("Failed to load products", err));
-//   }, []);
-
-//   return (
-//     <div className={styles.container}>
-//       <h1>Manage Products</h1>
-//       <table className={styles.table}>
-//         <thead>
-//           <tr>
-//             <th>Name</th>
-//             <th>Price</th>
-//             <th>Actions</th>
-//           </tr>
-//         </thead>
-//         <tbody>
-//           {products.map((product) => (
-//             <tr key={product.id}>
-//               <td>{product.name}</td>
-//               <td>${product.price}</td>
-//               <td>
-//                 <button
-//                   onClick={() =>
-//                     router.push(`/admin/add-product?id=${product.id}`)
-//                   }
-//                 >
-//                   Edit
-//                 </button>
-//                 <button
-//                   onClick={() =>
-//                     fetch(`/api/products/${product.id}`, {
-//                       method: "DELETE",
-//                     }).then(() => window.location.reload())
-//                   }
-//                 >
-//                   Delete
-//                 </button>
-//               </td>
-//             </tr>
-//           ))}
-//         </tbody>
-//       </table>
-//     </div>
-//   );
-// }
-// "use client";
-
-// import { useState, useEffect } from "react";
-// import { useRouter } from "next/navigation";
-// import styles from "./ManageProducts.module.css";
-
-// export default function ManageProducts() {
-//   const router = useRouter();
-//   const [products, setProducts] = useState([]);
-//   const [isLoading, setIsLoading] = useState(true);
-//   const [editingProduct, setEditingProduct] = useState(null);
-//   const [form, setForm] = useState({
-//     name: "",
-//     description: "",
-//     price: "",
-//     image: null,
-//   });
-//   const [preview, setPreview] = useState("");
-
-//   // Fetch products
-//   useEffect(() => {
-//     fetch("/api/products")
-//       .then((res) => res.json())
-//       .then((data) => {
-//         setProducts(data);
-//         console.log("Data fetched:", data);
-//         setIsLoading(false);
-//       })
-//       .catch((err) => {
-//         console.error("Failed to fetch products", err);
-//         setIsLoading(false);
-//       });
-//   }, []);
-
-//   // Handle form input change
-//   const handleChange = (e) => {
-//     setForm({ ...form, [e.target.name]: e.target.value });
-//   };
-
-//   // Handle image selection
-//   const handleImageChange = (e) => {
-//     const file = e.target.files[0];
-//     if (file) {
-//       setForm({ ...form, image: file });
-//       setPreview(URL.createObjectURL(file));
-//     }
-//   };
-
-//   // Handle add or edit submission
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     setIsLoading(true);
-
-//     const formData = new FormData();
-//     formData.append("name", form.name);
-//     formData.append("description", form.description);
-//     formData.append("price", form.price);
-//     if (form.image) formData.append("image", form.image);
-
-//     try {
-//       const response = await fetch(
-//         `/api/products${editingProduct ? `/${editingProduct.id}` : ""}`,
-//         {
-//           method: editingProduct ? "PUT" : "POST",
-//           body: formData,
-//         }
-//       );
-
-//       if (response.ok) {
-//         alert(`Product ${editingProduct ? "updated" : "added"} successfully!`);
-//         setEditingProduct(null); // Reset editing state
-//         setForm({ name: "", description: "", price: "", image: null });
-//         setPreview("");
-//         fetchProducts(); // Refresh product list
-//       } else {
-//         alert("Failed to save product.");
-//       }
-//     } catch (error) {
-//       alert("An error occurred. Please try again.");
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   // Fetch products again after add/edit
-//   const fetchProducts = () => {
-//     fetch("/api/products")
-//       .then((res) => res.json())
-//       .then((data) => setProducts(data))
-//       .catch((err) => console.error("Failed to fetch products", err));
-//   };
-
-//   // Handle delete
-//   const handleDelete = async (id) => {
-//     if (!confirm("Are you sure you want to delete this product?")) return;
-
-//     setIsLoading(true);
-//     try {
-//       const response = await fetch(`/api/products/${id}`, { method: "DELETE" });
-
-//       if (response.ok) {
-//         alert("Product deleted successfully!");
-//         setProducts(products.filter((product) => product.id !== id));
-//       } else {
-//         alert("Failed to delete product.");
-//       }
-//     } catch (error) {
-//       alert("An error occurred. Please try again.");
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   // Start editing a product
-//   const startEditing = (product) => {
-//     setEditingProduct(product);
-//     setForm({
-//       name: product.name,
-//       description: product.description,
-//       price: product.price,
-//       image: null,
-//     });
-//     setPreview(product.image); // Assuming product.image contains the URL
-//   };
-
-//   return (
-//     <div className={styles.container}>
-//       <h1>{editingProduct ? "Edit Product" : "Add New Product"}</h1>
-//       <form onSubmit={handleSubmit} className={styles.form}>
-//         <div className={styles.formGroup}>
-//           <label>Product Name</label>
-//           <input
-//             type="text"
-//             name="name"
-//             value={form.name}
-//             onChange={handleChange}
-//             required
-//           />
-//         </div>
-//         <div className={styles.formGroup}>
-//           <label>Description</label>
-//           <textarea
-//             name="description"
-//             value={form.description}
-//             onChange={handleChange}
-//             required
-//           />
-//         </div>
-//         <div className={styles.formGroup}>
-//           <label>Price</label>
-//           <input
-//             type="number"
-//             name="price"
-//             value={form.price}
-//             onChange={handleChange}
-//             required
-//           />
-//         </div>
-//         <div className={styles.formGroup}>
-//           <label>Product Image</label>
-//           <input type="file" onChange={handleImageChange} />
-//           {preview && (
-//             <img src={preview} alt="Preview" className={styles.imagePreview} />
-//           )}
-//         </div>
-//         <button
-//           type="submit"
-//           className={styles.submitButton}
-//           disabled={isLoading}
-//         >
-//           {isLoading
-//             ? editingProduct
-//               ? "Updating..."
-//               : "Adding..."
-//             : editingProduct
-//             ? "Update Product"
-//             : "Add Product"}
-//         </button>
-//         {editingProduct && (
-//           <button
-//             type="button"
-//             onClick={() => setEditingProduct(null)}
-//             className={styles.cancelButton}
-//           >
-//             Cancel Edit
-//           </button>
-//         )}
-//       </form>
-
-//       <h2>Existing Products</h2>
-//       {isLoading ? (
-//         <p>Loading products...</p>
-//       ) : products.length === 0 ? (
-//         <p>No products found.</p>
-//       ) : (
-//         <ul className={styles.productList}>
-//           {products.map((product) => (
-//             <li key={product.id} className={styles.productItem}>
-//               <div>
-//                 <strong>{product.name}</strong> - ${product.price}
-//               </div>
-//               <div>
-//                 <button
-//                   onClick={() => startEditing(product)}
-//                   className={styles.editButton}
-//                 >
-//                   Edit
-//                 </button>
-//                 <button
-//                   onClick={() => handleDelete(product.id)}
-//                   className={styles.deleteButton}
-//                   disabled={isLoading}
-//                 >
-//                   Delete
-//                 </button>
-//               </div>
-//             </li>
-//           ))}
-//         </ul>
-//       )}
-//     </div>
-//   );
-// }

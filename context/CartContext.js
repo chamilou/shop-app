@@ -1,4 +1,4 @@
-"use client"; // Mark this as a Client Component
+"use client";
 
 import { createContext, useContext, useState } from "react";
 
@@ -6,11 +6,15 @@ const CartContext = createContext();
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
+
   // Calculate total cost
   const totalCost = cart.reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
+
+  // Get total item count
+  const itemCount = cart.reduce((count, item) => count + item.quantity, 0);
 
   // Add an item to the cart or increment its quantity if it already exists
   const addToCart = (recipe) => {
@@ -38,12 +42,17 @@ export function CartProvider({ children }) {
       prevCart.map((item) => (item.id === id ? { ...item, quantity } : item))
     );
   };
-  const itemCount = cart.length;
 
-  // Add, remove, and update quantity functions...
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, removeFromCart, updateQuantity, totalCost }}
+      value={{
+        cart,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        totalCost,
+        itemCount,
+      }}
     >
       {children}
     </CartContext.Provider>

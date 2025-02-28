@@ -19,3 +19,28 @@
   color: #555;
   font-size: 18px;
 }
+.sidebar {
+  background-color: #222; /* Dark sidebar */
+  color: white;
+  padding: 20px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.mainContent {
+  padding: 20px;
+  height: 100vh;
+  overflow: auto;
+}
+
+.resizer {
+  width: 5px;
+  background: #ccc;
+  cursor: ew-resize;
+  transition: background 0.3s;
+}
+
+.resizer:hover {
+  background: #888;
+}

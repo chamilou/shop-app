@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
-import styles from "./Navbar.module.css";
 import { useCart } from "@/context/CartContext";
+import { ShoppingCart } from "lucide-react"; // Importing cart icon
+import styles from "./Navbar.module.css";
 
 export default function Navbar() {
   const { user, logout } = useUser();
@@ -15,15 +16,18 @@ export default function Navbar() {
         <Link href="/">My App</Link>
       </div>
       <div className={styles.links}>
-        {/* Cart Link (always visible) */}
+        {/* Cart Link with Icon */}
         <Link href="/cart" className={styles.cartLink}>
-          <span className={styles.cartLink}>Cart({itemCount})</span>
+          <ShoppingCart className={styles.cartIcon} size={24} />
+          {itemCount > 0 && (
+            <span className={styles.cartCount}>{itemCount}</span>
+          )}
         </Link>
 
         {/* Conditional rendering for Login/Register or Logout */}
         {user ? (
           <>
-            {user && user.role === "admin" && (
+            {user.role === "admin" && (
               <Link href="/admin/" className={styles.link}>
                 Admin Dashboard
               </Link>

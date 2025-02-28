@@ -1,68 +1,17 @@
-/* Navbar container */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background-color: #333;
-  color: white;
-}
-
-/* Logo styling */
-.logo a {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: white;
-  text-decoration: none;
-}
-
-/* Links container */
-.links {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-/* Welcome message */
-.welcome {
-  font-size: 1rem;
-  color: #ccc;
-}
-
-/* Link styling */
-.link {
-  color: white;
-  text-decoration: none;
-  font-size: 1rem;
-  transition: color 0.3s ease;
-}
-
-.link:hover {
-  color: #d97706;
-}
-
-/* Logout button */
-.logoutButton {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-.logoutButton:hover {
-  color: #d97706;
-}
-
 /* Navbar.module.css */
 .navbar {
+  /* Keeps navbar fixed at the top */
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #333; /* Adjust as needed */
+  color: white;
+  padding: 15px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  background-color: #2c3e50;
-  color: white;
+  z-index: 1000; /* Ensures it's above other elements */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional shadow for better visibility */
 }
 
 .logo a {
@@ -108,11 +57,38 @@
 .logoutButton:hover {
   background-color: #cc0000;
 }
-.cartCount {
-  background-color: #ff4d4d;
+
+.cartLink {
   color: white;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
+.cartLink:hover {
+  color: #1abc9c;
+}
+
+.cartLink {
+  position: relative;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+.cartIcon {
+  color: white;
+}
+
+.cartCount {
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  background: red;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 3px 6px;
   border-radius: 50%;
-  padding: 2px 6px;
-  font-size: 0.8rem;
-  margin-left: 5px;
 }
