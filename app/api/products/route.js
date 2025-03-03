@@ -9,7 +9,7 @@ import {
 
 // POST request to add a product
 export async function POST(request) {
-  const formData = await request.formData();
+  const formData = request.formData();
   const name = formData.get("name");
   const description = formData.get("description");
   const price = parseFloat(formData.get("price"));
@@ -31,7 +31,7 @@ export async function POST(request) {
 
     // Add the product to the database
     const imageUrl = `/media/${image.name}`;
-    await addProduct(name, description, imageUrl, price); // Ensure addProduct is asynchronous
+    await addProduct(name, description, imageUrl, price);
 
     return new Response(
       JSON.stringify({ message: "Product added successfully" }),
@@ -46,18 +46,26 @@ export async function POST(request) {
     });
   }
 }
+
 // GET request to fetch all products
 export async function GET() {
-  const products = getProducts(); // Make sure getProducts is asynchronous
-  return new Response(JSON.stringify(products), {
-    headers: { "Content-Type": "application/json" },
-  });
+  try {
+    const products = await getProducts(); // Ensure getProducts is asynchronous
+    return new Response(JSON.stringify(products), {
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: "Failed to fetch products" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 }
 
 // PUT request to update a product
 export async function PUT(request) {
   const formData = await request.formData();
-  const id = formData.get("id"); // Ensure the product ID is sent
+  const id = formData.get("id");
   const name = formData.get("name");
   const description = formData.get("description");
   const price = parseFloat(formData.get("price"));
@@ -75,9 +83,7 @@ export async function PUT(request) {
     if (image) {
       // If a new image is uploaded, save it and get the URL
       const bytes = await image.arrayBuffer();
-      // const buffer = Buffer.from(bytes);
-      const buffer = Buffer.from(await image.arrayBuffer());
-
+      const buffer = Buffer.from(bytes);
       const imagePath = join(process.cwd(), "public", "media", image.name);
       await writeFile(imagePath, buffer);
       imageUrl = `/media/${image.name}`;
@@ -102,33 +108,53 @@ export async function PUT(request) {
 
 export async function DELETE(request, { params }) {
   const { id } = params;
-  return new Response(JSON.stringify({ message: "Product deleted" }), {
-    headers: { "Content-Type": "application/json" },
-  });
+  console.log("Deleting product with ID:", id); // Debugging log
+
+  try {
+    // Fetch the product to get the image URL
+    const product = await getProductById(id);
+    if (!product) {
+      return new Response(JSON.stringify({ error: "Product not found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // Delete the image file from the server
+    if (product.imageUrl) {
+      const imageUrlWithoutLeadingSlash = product.imageUrl.startsWith("/")
+        ? product.imageUrl.slice(1)
+        : product.imageUrl;
+
+      const imagePath = join(
+        process.cwd(),
+        "public",
+        imageUrlWithoutLeadingSlash
+      );
+      console.log("Deleting image at path:", imagePath); // Debugging log
+
+      try {
+        await unlink(imagePath);
+        console.log("Image deleted successfully");
+      } catch (error) {
+        console.error("Error deleting image:", error);
+      }
+    }
+
+    // Delete the product from the database
+    await deleteProduct(id);
+
+    return new Response(
+      JSON.stringify({ message: "Product deleted successfully" }),
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  } catch (error) {
+    console.error("Error deleting product:", error); // Debugging log
+    return new Response(JSON.stringify({ error: "Failed to delete product" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 }
-// DELETE request to delete a product
-// export async function DELETE(request) {
-//   const { id } = await request.json(); // Assuming the ID is sent in the request body
-
-//   if (!id) {
-//     return new Response(JSON.stringify({ error: "Product ID is required" }), {
-//       status: 400,
-//       headers: { "Content-Type": "application/json" },
-//     });
-//   }
-
-//   try {
-//     await deleteProduct(id); // Delete the product from the database
-//     return new Response(
-//       JSON.stringify({ message: "Product deleted successfully" }),
-//       {
-//         headers: { "Content-Type": "application/json" },
-//       }
-//     );
-//   } catch (error) {
-//     return new Response(JSON.stringify({ error: "Failed to delete product" }), {
-//       status: 500,
-//       headers: { "Content-Type": "application/json" },
-//     });
-//   }
-// }
