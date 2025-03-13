@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import styles from "@/app/admin/admin.module.css";
 import Sidebar from "@/components/Sidebar";
-import AddProductPage from "@/components/Add-product";
+// import AddProductPage from "@/components/Add-product";
 import ManageUsers from "@/components/Manage-users";
 import ManageProducts from "@/components/ManageProducts";
 
@@ -53,7 +53,7 @@ export default function AdminPage() {
               <p>Welcome, Admin! Here you can manage products and users.</p>
             </>
           )}
-          {activeSection === "add-product" && <AddProductPage />}
+          {/* {activeSection === "add-product" && <AddProductPage />} */}
           {activeSection === "manage-users" && <ManageUsers />}
           {activeSection === "manage-products" && <ManageProducts />}
         </div>

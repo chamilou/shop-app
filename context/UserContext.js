@@ -2,14 +2,11 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 
-// Create the context
 const UserContext = createContext();
 
-// Create the provider component
 export function UserProvider({ children }) {
   const [user, setUser] = useState(null);
 
-  // Initialize user state from localStorage
   useEffect(() => {
     const token = localStorage.getItem("token");
     const userData = JSON.parse(localStorage.getItem("user"));
@@ -18,18 +15,19 @@ export function UserProvider({ children }) {
     }
   }, []);
 
-  // Login function
   const login = (userData) => {
     setUser(userData);
-    localStorage.setItem("token", userData.token); // Save token to localStorage
-    localStorage.setItem("user", JSON.stringify(userData)); // Save user data to localStorage
+    localStorage.setItem("token", userData.token);
+    localStorage.setItem("user", JSON.stringify(userData));
   };
 
-  // Logout function
   const logout = () => {
+    if (user) {
+      localStorage.removeItem(`cart_${user.id}`); //Clear user-specific cart
+    }
     setUser(null);
-    localStorage.removeItem("token"); // Clear the token from localStorage
-    localStorage.removeItem("user"); // Clear the user data from localStorage
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
   };
 
   return (
@@ -41,16 +39,5 @@ export function UserProvider({ children }) {
 
 // Custom hook to use the context
 export function useUser() {
-  const context = useContext(UserContext);
-  if (!context) {
-    throw new Error("useUser must be used within a UserProvider");
-  }
-  return context;
+  return useContext(UserContext);
 }
-const login = (userData) => {
-  // Add isAdmin property if not provided by the backend
-  const userWithRole = { ...userData, isAdmin: userData.role === "admin" };
-  setUser(userWithRole);
-  localStorage.setItem("token", userWithRole.token);
-  localStorage.setItem("user", JSON.stringify(userWithRole));
-};

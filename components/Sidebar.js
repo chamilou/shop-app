@@ -13,9 +13,9 @@ export default function Sidebar({ onNavigate }) {
           <li onClick={() => onNavigate("dashboard")} className={styles.link}>
             Dashboard
           </li>
-          <li onClick={() => onNavigate("add-product")} className={styles.link}>
+          {/* <li onClick={() => onNavigate("add-product")} className={styles.link}>
             Add Product
-          </li>
+          </li> */}
           <li
             onClick={() => onNavigate("manage-products")}
             className={styles.link}

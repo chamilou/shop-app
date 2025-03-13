@@ -1,25 +1,21 @@
-import { writeFile, unlink } from "fs/promises"; // Import unlink for deleting files
+import { NextResponse } from "next/server";
+import { writeFile } from "fs/promises"; // Import writeFile for saving images
 import { join } from "path";
-import {
-  addProduct,
-  getProducts,
-  updateProduct,
-  deleteProduct,
-} from "@/lib/db"; // Ensure updateProduct and deleteProduct are defined
+import { addProduct, getProducts, updateProduct } from "@/lib/db";
 
 // POST request to add a product
 export async function POST(request) {
-  const formData = request.formData();
+  const formData = await request.formData();
   const name = formData.get("name");
   const description = formData.get("description");
   const price = parseFloat(formData.get("price"));
   const image = formData.get("image");
 
   if (!name || !description || !price || !image) {
-    return new Response(JSON.stringify({ error: "All fields are required" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json(
+      { error: "All fields are required" },
+      { status: 400 }
+    );
   }
 
   try {
@@ -33,32 +29,30 @@ export async function POST(request) {
     const imageUrl = `/media/${image.name}`;
     await addProduct(name, description, imageUrl, price);
 
-    return new Response(
-      JSON.stringify({ message: "Product added successfully" }),
-      {
-        headers: { "Content-Type": "application/json" },
-      }
+    return NextResponse.json(
+      { message: "Product added successfully" },
+      { status: 200 }
     );
   } catch (error) {
-    return new Response(JSON.stringify({ error: "Failed to add product" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    console.error("Failed to add product:", error);
+    return NextResponse.json(
+      { error: "Failed to add product" },
+      { status: 500 }
+    );
   }
 }
 
 // GET request to fetch all products
 export async function GET() {
   try {
-    const products = await getProducts(); // Ensure getProducts is asynchronous
-    return new Response(JSON.stringify(products), {
-      headers: { "Content-Type": "application/json" },
-    });
+    const products = await getProducts();
+    return NextResponse.json(products, { status: 200 });
   } catch (error) {
-    return new Response(JSON.stringify({ error: "Failed to fetch products" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    console.error("Failed to fetch products:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch products" },
+      { status: 500 }
+    );
   }
 }
 
@@ -73,10 +67,10 @@ export async function PUT(request) {
   let imageUrl = null;
 
   if (!id || !name || !description || !price) {
-    return new Response(JSON.stringify({ error: "All fields are required" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json(
+      { error: "All fields are required" },
+      { status: 400 }
+    );
   }
 
   try {
@@ -92,69 +86,15 @@ export async function PUT(request) {
     // Update the product in the database
     await updateProduct(id, { name, description, price, imageUrl });
 
-    return new Response(
-      JSON.stringify({ message: "Product updated successfully" }),
-      {
-        headers: { "Content-Type": "application/json" },
-      }
+    return NextResponse.json(
+      { message: "Product updated successfully" },
+      { status: 200 }
     );
   } catch (error) {
-    return new Response(JSON.stringify({ error: "Failed to update product" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-}
-
-export async function DELETE(request, { params }) {
-  const { id } = params;
-  console.log("Deleting product with ID:", id); // Debugging log
-
-  try {
-    // Fetch the product to get the image URL
-    const product = await getProductById(id);
-    if (!product) {
-      return new Response(JSON.stringify({ error: "Product not found" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    // Delete the image file from the server
-    if (product.imageUrl) {
-      const imageUrlWithoutLeadingSlash = product.imageUrl.startsWith("/")
-        ? product.imageUrl.slice(1)
-        : product.imageUrl;
-
-      const imagePath = join(
-        process.cwd(),
-        "public",
-        imageUrlWithoutLeadingSlash
-      );
-      console.log("Deleting image at path:", imagePath); // Debugging log
-
-      try {
-        await unlink(imagePath);
-        console.log("Image deleted successfully");
-      } catch (error) {
-        console.error("Error deleting image:", error);
-      }
-    }
-
-    // Delete the product from the database
-    await deleteProduct(id);
-
-    return new Response(
-      JSON.stringify({ message: "Product deleted successfully" }),
-      {
-        headers: { "Content-Type": "application/json" },
-      }
+    console.error("Failed to update product:", error);
+    return NextResponse.json(
+      { error: "Failed to update product" },
+      { status: 500 }
     );
-  } catch (error) {
-    console.error("Error deleting product:", error); // Debugging log
-    return new Response(JSON.stringify({ error: "Failed to delete product" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
   }
 }

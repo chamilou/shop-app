@@ -1,22 +1,32 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import { useUser } from "./UserContext"; // Ensure we track logged-in users
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
+  const { user } = useUser();
   const [cart, setCart] = useState([]);
 
-  // Calculate total cost
-  const totalCost = cart.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  );
+  // ✅ Load user-specific cart on login
+  useEffect(() => {
+    if (user) {
+      const storedCart =
+        JSON.parse(localStorage.getItem(`cart_${user.id}`)) || [];
+      setCart(storedCart);
+    } else {
+      setCart([]); // If no user, clear the cart
+    }
+  }, [user]);
 
-  // Get total item count
-  const itemCount = cart.reduce((count, item) => count + item.quantity, 0);
+  // ✅ Save user-specific cart on change
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem(`cart_${user.id}`, JSON.stringify(cart));
+    }
+  }, [cart, user]);
 
-  // Add an item to the cart or increment its quantity if it already exists
   const addToCart = (recipe) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find((item) => item.id === recipe.id);
@@ -31,17 +41,21 @@ export function CartProvider({ children }) {
     });
   };
 
-  // Remove an item from the cart
   const removeFromCart = (id) => {
     setCart((prevCart) => prevCart.filter((item) => item.id !== id));
   };
 
-  // Update the quantity of an item in the cart
   const updateQuantity = (id, quantity) => {
     setCart((prevCart) =>
       prevCart.map((item) => (item.id === id ? { ...item, quantity } : item))
     );
   };
+
+  const totalCost = cart.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
+  const itemCount = cart.reduce((count, item) => count + item.quantity, 0);
 
   return (
     <CartContext.Provider

@@ -1,24 +1,20 @@
-"use client"; // Mark this as a Client Component
+"use client";
 
+import { useCart } from "../../context/CartContext";
+import { useUser } from "../../context/UserContext"; // Assuming you have user authentication
 import Image from "next/image";
 import Link from "next/link";
-import { useCart } from "../../context/CartContext";
 import styles from "./cart.module.css";
 
 export default function CartPage() {
-  const { cart, removeFromCart, updateQuantity } = useCart();
-
-  // Calculate the total cost
-  const totalCost = cart.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  );
+  const { cart, removeFromCart, updateQuantity, totalCost } = useCart();
+  const { user } = useUser();
 
   const handleQuantityChange = (id, quantity) => {
     if (quantity < 1) {
-      removeFromCart(id); // Remove the item if quantity is less than 1
+      removeFromCart(id);
     } else {
-      updateQuantity(id, quantity); // Update the quantity
+      updateQuantity(id, quantity);
     }
   };
 
@@ -74,11 +70,19 @@ export default function CartPage() {
               </div>
             ))}
           </div>
+
           <div className={styles.totalCost}>
-            <h3>Total Cost: ${totalCost.toFixed(2)}</h3>
-            <Link href="/checkout" className={styles.checkoutButton}>
-              Proceed to Checkout
-            </Link>
+            <h3>Total Cost: ${totalCost ? totalCost.toFixed(2) : "0.00"}</h3>
+
+            {!user ? (
+              <p className={styles.loginMessage}>
+                Please <Link href="/login">log in</Link> to proceed to checkout.
+              </p>
+            ) : (
+              <Link href="/checkout" className={styles.checkoutButton}>
+                Proceed to Checkout
+              </Link>
+            )}
           </div>
         </>
       )}

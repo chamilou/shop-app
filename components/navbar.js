@@ -1,22 +1,46 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import { useCart } from "@/context/CartContext";
-import { ShoppingCart } from "lucide-react"; // Importing cart icon
+import { ShoppingCart } from "lucide-react";
 import styles from "./Navbar.module.css";
 
 export default function Navbar() {
   const { user, logout } = useUser();
   const { itemCount } = useCart();
+  const [prevScrollPos, setPrevScrollPos] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollPos = window.scrollY;
+      const isScrollingUp = prevScrollPos > currentScrollPos;
+      setVisible(isScrollingUp || currentScrollPos < 10);
+      setPrevScrollPos(currentScrollPos);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [prevScrollPos]);
 
   return (
-    <nav className={styles.navbar}>
+    <nav
+      className={`${styles.navbar} ${visible ? styles.visible : styles.hidden}`}
+    >
       <div className={styles.logo}>
         <Link href="/">My App</Link>
       </div>
+
       <div className={styles.links}>
-        {/* Cart Link with Icon */}
+        <Link href="/products" className={styles.link}>
+          Products
+        </Link>
+        <Link href="/contact" className={styles.link}>
+          Contacts
+        </Link>
+
         <Link href="/cart" className={styles.cartLink}>
           <ShoppingCart className={styles.cartIcon} size={24} />
           {itemCount > 0 && (
@@ -24,7 +48,6 @@ export default function Navbar() {
           )}
         </Link>
 
-        {/* Conditional rendering for Login/Register or Logout */}
         {user ? (
           <>
             {user.role === "admin" && (

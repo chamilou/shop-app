@@ -1,11 +1,4 @@
 
-Optional: Migrate Data from SQLite to PostgreSQL
-
-If you have existing data in your SQLite database, you can migrate it to PostgreSQL using a tool like pgloader.
-
-Example pgloader Script (migrate.load)
-
-lisp
 Copy
 LOAD DATABASE
     FROM sqlite:///path/to/your/sqlite.db
